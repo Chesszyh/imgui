@@ -1,0 +1,309 @@
+dear imgui
+更新日志
+
+本文档包含我们也在发布说明中使用的面向用户的更新日志。
+我们通常将涉及同一主题的多个提交合并为一个条目。
+后端的更改也包含在每个后端的单个 .cpp 文件中。
+
+常见问题解答 (FAQ)    https://www.dearimgui.com/faq/
+发布说明              https://github.com/ocornut/imgui/releases
+维基 (WIKI)             https://github.com/ocornut/imgui/wiki
+入门指南                https://github.com/ocornut/imgui/wiki/Getting-Started
+术语表                  https://github.com/ocornut/imgui/wiki/Glossary
+问题与支持              https://github.com/ocornut/imgui/issues
+
+何时更新？
+
+- 建议定期更新您的 Dear ImGui 副本。
+- 通常，同步到 'master' 或 'docking' 分支的最新提交是安全且推荐的。
+  该库相当稳定，报告的回归问题往往会很快得到修复。
+
+如何更新？
+
+- 更新子模块或复制/覆盖所有文件。
+- 关于 imconfig.h：
+  - 您可以修改您的 imconfig.h 副本，在这种情况下不要覆盖它。
+  - 或者您可以本地分支以修改 imconfig.h 并合并/变基最新的代码。
+  - 或者您可以从您的构建系统中全局 '#define IMGUI_USER_CONFIG "my_config_file.h"' 来
+    为您的 imconfig.h 文件指定一个自定义路径，从而不必修改默认文件。
+- 阅读“重大变更”部分（在 imgui.cpp 中或在此更新日志中）。
+- 如果您遇到函数/符号丢失的问题，请在代码中搜索其名称，很可能会有关于它的注释。
+- 如果您正在将此存储库复制到您的代码库中，请将演示和文档文件保留在其中，它们会很有用。
+- 您可以将您之前的更新日志与您刚刚复制的更新日志进行比较，并阅读该差异。
+- 您可以在 imconfig.h 中启用 `IMGUI_DISABLE_OBSOLETE_FUNCTIONS` 以强制禁用旧的名称和符号。
+  偶尔这样做是确保您没有使用过时符号的好方法。Dear ImGui 正在积极开发中，
+  最近 API 更新稍微频繁一些。它们在下面和 imgui.cpp 中有记录，应该不会影响所有用户。
+- 请报告任何问题！
+
+-----------------------------------------------------------------------
+ 版本 1.92.2 WIP (进行中)
+-----------------------------------------------------------------------
+
+重大变更：
+
+其他变更：
+
+
+-----------------------------------------------------------------------
+ 版本 1.92.1 (发布于 2025-07-09)
+-----------------------------------------------------------------------
+
+带装饰的日志和发布说明：https://github.com/ocornut/imgui/releases/tag/v1.92.1
+
+变更：
+
+- 字体：添加了 ImFontAtlas::SetFontLoader() 以在运行时动态更改字体
+  加载器，而无需使用内部 API。(#8752, #8465)
+- 字体：修复了动态更改字体加载器会在某些情况下丢失
+  后备和省略号字形的错误。(#8763)
+- 字体：对于大尺寸字体，布局/尺寸计算仅加载字形度量。
+  实际字形在被绘图函数使用时进行渲染+打包。(#8758, #8465)
+- 字体：在 ImGui:: API 级别设置最大字体大小为 512.0f，以减少
+  边缘情况（例如内存不足错误）。ImDrawList:: API 没有此
+  限制。(#8758)
+- 字体：将 ImFontConfig::FontNo 恢复为 32 位值，因为需要
+  将完整范围的信息传递到例如 FreeType 的 face_index 中，因为从 FreeType 2.6.1 开始使用了更高的
+  位。(#8775) [@Valakor]
+  （该字段在 1.92.0 中被错误地从 32 位减少到 8 位）
+- 纹理：修复了对 `#define ImTextureID_Invalid` 为非零值的支持：
+  ImTextureData() 被错误地用零清除。(#8745) [@rachit7645]
+- 演示：添加了“文本 -> 字体大小”演示部分。(#8738) [@Demonese]
+- CI：修复了 dllimport/dllexport 测试。(#8757) [@AidanSun05]
+- CI：更新为使用最新的 Windows 映像 + VS2022。
+- 调试工具：添加了 IMGUI_DEBUG_HIGHLIGHT_ALL_ID_CONFLICTS 以在悬停*之前*
+  检测 id 冲突。这非常慢，只应临时使用。(#8651, #7961, #7669)
+- 示例：GLFW+OpenGL3, GLFW+WGPU：Emscripten Makefile 使用 GLFW 端口
+  'contrib.glfw3'，它提供了更好的 HiDPI 支持。(#8742) [@pthom]
+- 后端：GLFW, SDL2 使 ImGui_ImplGLFW_GetContentScaleXXX() 和
+  ImGui_ImplSDL2_GetContentScaleXXXX() 助手在 Emscripten
+  和 Android 平台上返回 1.0f，与 macOS 逻辑匹配。(#8742, #8733) [@pthom]
+- 后端：SDL3：如果已经激活，则避免再次调用 SDL_StartTextInput()。
+  （修复例如：在 iOS 上，每次用户键入一个键时键盘动画都会弹出的问题 + 可能还有其他问题）(#8727) [@morrazzzz]
+- 后端：OSX：添加了 ImGuiMouseCursor_Wait 和 ImGuiMouseCursor_Progress
+  鼠标光标支持。(#8739) [@cfillion]
+- 后端：Allegro5：修复了在某些平台上纹理更新损坏的问题，其中
+  ALLEGRO_LOCK_WRITEONLY 需要重写所有纹素。(#8770)
+- 后端：Vulkan：使用 nonCoherentAtomSize 对齐 upload_size，修复了
+  某些设置上的验证错误。(#8743, #8744) [@tquante]
+- 后端：Vulkan：修复了 1.92.0 中引入的纹理同步问题，
+  导致验证层做出反应。(#8772) [@Majora320]
+
+
+-----------------------------------------------------------------------
+ 版本 1.92.0 (发布于 2025-06-25)
+-----------------------------------------------------------------------
+
+带装饰的日志和发布说明：https://github.com/ocornut/imgui/releases/tag/v1.92.0
+
+此版本包含自 2015 年以来最大量的重大变更！
+我非常努力地将它们保持在最低限度，减少干扰量，
+但不可避免地，一些用户或第三方扩展会受到影响。
+
+有关升级自定义后端的说明：
+--> 请参阅 https://github.com/ocornut/imgui/blob/master/docs/BACKENDS.md
+
+为了帮助我们改进过渡过程，包括文档和注释，
+请向以下地址报告**任何**疑问、困惑、问题、反馈：
+    https://github.com/ocornut/imgui/issues/
+如果您正在使用以某种方式
+损坏且不清楚如何解决的自定义小部件、内部构件或第三方扩展，请在问题中发帖，以便我们收集
+数据并分享可能对他人有帮助的解决方案。
+
+作为减少 API 重大变更影响计划的一部分，一些与字体和文本系统以及缩放相关的未完成的
+变更/功能/重构将成为后续版本（1.92.1+）的一部分。
+
+如果您从旧版本更新，并期望进行大规模或困难的更新，
+请考虑首先更新到 1.91.9 以减少变更量。
+
+重大变更：
+
+- 字体：**重要**：如果您的应用通过设置 io.DisplayFramebufferScale（例如为 2.0f）
+  + 设置 io.FontGlobalScale（例如为 1.0f/2.0f）+ 以缩放尺寸加载字体（例如尺寸 X * 2.0f）来解决 OSX/iOS Retina 屏幕特有的
+  逻辑与显示缩放问题：
+    - 这将无法正确映射到新系统！因为字体将按请求的尺寸进行光栅化。
+    - 使用旧版后端（< 1.92）：
+      - 不要设置 io.FontGlobalScale = 1.0f/N -> 设置 ImFontCfg::RasterizerDensity = N。
+      - 这在以前已经有效，但现在几乎是必需的。
+    - 使用新后端（1.92+）：
+      - 这应该都是自动的。
+      - FramebufferScale 会自动用于设置当前字体的 RasterizerDensity。
+      - FramebufferScale 是一个由后端通过 `docking` 分支中的
+        Platform_GetWindowFramebufferScale() 处理程序提供的每视口属性。
+- 字体：**重要** 关于字体大小：
+   - 在 1.92 之前，字体是单一尺寸的。它们现在可以动态调整大小。
+   - PushFont() API 现在有一个必需的尺寸参数。
+       `void PushFont(ImFont* font)` --> `void PushFont(ImFont* font, float size);`
+       - `PushFont(font, 0.0f)`                       // 更改字体并保持当前大小
+       - `PushFont(NULL, 20.0f)`                      // 保持字体并更改当前大小
+       - `PushFont(font, 20.0f)`                      // 更改字体并将大小设置为 20.0f
+       - `PushFont(font, style.FontSizeBase * 2.0f)`  // 更改字体并将大小设置为当前大小的两倍。
+       - `PushFont(font, font->LegacySize)`           // 更改字体并将大小设置为传递给 AddFontXXX() 函数的大小。与 1.92 之前的行为相同，适用于固定大小的字体。
+   - 要使用旧行为，请在调用站点使用 `ImGui::PushFont(font, font->LegacySize)`。
+     我们故意没有添加默认参数，因为这会使长期
+     过渡更加困难。
+   - 保留了内联重定向字体。将过时。
+   - 全局缩放因子可以应用于提供的尺寸之上。
+     这就是为什么它在样式结构中被称为 `FontSizeBase`。
+   - 全局缩放因子是：`style.FontScaleMain`、`style.FontScaleDpi` 以及可能更多。
+   - `ImFont::FontSize` 已被移除，不再有意义。
+   - `ImFont::LegacySize` 是传递给 `AddFont()` 的大小。
+   - 移除了对旧的 `PushFont(NULL)` 的支持，它是“恢复为默认字体”的快捷方式。
+     `PushFont(NULL, some_size)` 现在保持当前更改并更改大小。
+   - 将 `io.FontGlobalScale` 重命名/移动到 `style.FontScaleMain`。
+- 字体：**重要** 关于字体合并：
+  - 在多个合并字体中搜索字形时：我们搜索包含所需字形的**第一个**字体源。
+    因为用户不再需要提供字形范围，所以您期望从次要/合并的
+    图标字体中获取的字形可能会被错误地从主字体中获取。
+  - 我们添加了 `ImFontConfig::GlyphExcludeRanges[]` 来指定要从给定字体源中排除的范围：
+        // 添加字体源 1 但忽略 ICON_MIN_FA..ICON_MAX_FA 范围
+        static ImWchar exclude_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+        ImFontConfig cfg1;
+        cfg1.GlyphExcludeRanges = exclude_ranges;
+        io.Fonts->AddFontFromFileTTF("segoeui.ttf", 0.0f, &cfg1);
+        // 添加字体源 2，它期望使用上述范围
+        ImFontConfig cfg2;
+        cfg2.MergeMode = true;
+        io.Fonts->AddFontFromFileTTF("FontAwesome4.ttf", 0.0f, &cfg2);
+    - 您可以使用 `Metrics/Debugger->Fonts->Font->Input Glyphs Overlap Detection Tool` 来
+      查看多个字体源中可用的字形列表。这可以帮助理解
+      哪个字体输入提供了哪个字形。
+
+- 纹理：
+  - 所有接受 `ImTextureID` 参数的 API 函数现在都接受 `ImTextureRef`：
+    - `ImTextureRef` 是一个小型复合结构，可以从 `ImTextureID` 构建。
+      （或从 `ImTextureData*` 构建，它表示一个通常在渲染时
+      准备好的纹理）。
+    - 受影响的函数是：
+      - `ImGui::Image()`, `ImGui::ImageWithBg()`, `ImGui::ImageButton()`,
+      - `ImDrawList::AddImage()`, `ImDrawList::AddImageQuad()`, `ImDrawList::AddImageRounded()`。
+    - 我们建议 C 用户和任何更高级别的语言绑定生成器可以
+      以某种方式简化此转换，即模拟简单的 C++ 构造函数。
+- 字体：废弃了 `ImFontAtlas::GetTexDataAsRGBA32()`, `GetTexDataAsAlpha8()`, `Build()`, `SetTexID()`
+  和 `IsBuilt()` 函数。后端处理纹理的新协议不需要它们。
+  保留了重定向函数（将过时）。
+   - 大多数旧后端仍应与新代码一起工作（行为与以前一样）。
+   - 有关升级自定义后端的说明：
+     https://github.com/ocornut/imgui/blob/master/docs/BACKENDS.md
+   - 在初始化新后端之前调用 `ImFontAtlas::Build()` 会错误地触发
+     预加载所有字形。在后端初始化后将通过断言检测到。
+- 字体：`ImFontConfig::OversampleH/OversampleV` 默认为自动（== 0）
+  自 v1.91.8 起。在您决定是否要
+  提供一种表达更精细策略的方式之前，保持自动非常重要，否则在使用大字形时
+  您可能会浪费纹理空间。请注意，`imgui_freetype` 后端不使用也不
+  需要过采样。
+- 字体：现在不再需要指定字形范围。
+  - `ImFontConfig::GlyphRanges[]` 的值仅对旧版后端有用。
+  - 所有 `GetGlyphRangesXXXX()` 函数现在都标记为过时：
+    - `GetGlyphRangesDefault()`, `GetGlyphRangesGreek()`, `GetGlyphRangesKorean()`,
+      `GetGlyphRangesJapanese()`, `GetGlyphRangesChineseSimplifiedCommon()`,
+      `GetGlyphRangesChineseFull()`, `GetGlyphRangesCyrillic()`,
+      `GetGlyphRangesThai()`, `GetGlyphRangesVietnamese()`。
+- 字体：移除了 `ImFontAtlas::TexDesiredWidth` 以强制纹理宽度。(#327)
+  （在旧系统中它有点道理，因为如果未指定，纹理宽度最大为
+  4096，但该限制不再是必需的，并且 `Renderer_TextureMaxWidth` 涵盖了这一点）
+  但是，您可以设置 `TexMinWidth = TexMaxWidth` 以获得相同的效果。
+- 字体：如果您自己创建和管理 `ImFontAtlas` 实例（而不是依赖
+  `ImGuiContext` 创建一个），您需要自己调用 `ImFontAtlasUpdateNewFrame()`。
+  如果您不这样做，将会触发断言。
+- 字体：废弃了 `ImGui::SetWindowFontScale()`，它不再有用。建议使用
+  `PushFont(NULL, style.FontSizeBase * factor)` 或操作其他缩放因子。
+- 字体：废弃了 `ImFont::Scale`，它不再有用。
+- 字体：将 `ImFont::CalcWordWrapPositionA()` 更改为 `ImFont::CalcWordWrapPosition()`：
+   - 旧：`const char* CalcWordWrapPositionA(float scale, const char* text, ....);`
+   - 新：`const char* CalcWordWrapPosition (float size,  const char* text, ....);`
+  前导的 `float scale` 参数已更改为 `float size`。
+  这是必要的，因为 `scale` 假设是唯一的字体大小。
+  保留了假设使用 `font->LegacySize` 的内联重定向函数。
+- 字体：通常重构了 `ImFontAtlas` 和 `ImFont` 的内部结构。
+  虽然理论上绝大多数用户不应受到影响，但某些用例或
+  扩展可能会受到影响。其中包括：
+    - `ImDrawCmd::TextureId` 已更改为 `ImDrawCmd::TexRef`。
+    - `ImFontAtlas::TexID` 已更改为 `ImFontAtlas::TexRef`。
+    - `ImFontAtlas::ConfigData[]` 已重命名为 `ImFontAtlas::Sources[]`。
+    - `ImFont::ConfigData[]`, `ConfigDataCount` 已重命名为 `Sources[]`, `SourceCount`。
+    - 每个 `ImFont` 都有许多 `ImFontBaked` 实例，对应于活动使用的
+      大小。`ImFont::GetFontBaked(size)` 检索给定大小的实例。
+    - 从 `ImFont` 移动到 `ImFontBaked` 的字段：
+      - `ImFont::IndexAdvanceX[]`       -> `ImFontBaked::IndexAdvanceX[]`
+      - `ImFont::Glyphs[]`              -> `ImFontBaked::Glyphs[]`
+      - `ImFont::Ascent`, `Descent`       -> `ImFontBaked::Ascent`, `Descent`
+      - `ImFont::FindGlyph()`           -> `ImFontBaked::FindGlyph()`
+      - `ImFont::FindGlyphNoFallback()` -> `ImFontBaked::FindGlyphNoFallback()`
+      - `ImFont::GetCharAdvance()`      -> `ImFontBaked::GetCharAdvance()`
+      - 小部件代码可以使用 `ImGui::GetFontBaked()` 而不是 `ImGui::GetFont()` 来
+        访问当前字体在当前字体大小下的字体数据。
+        （您可以使用 `font->GetFontBaked(size)` 来访问任何其他大小的字体数据。）
+            `g.Font`      == `ImGui::GetFont()`
+            `g.FontSize`  == `ImGui::GetFontSize()`
+            `g.FontBaked` == `ImGui::GetFontBaked()` == `ImGui::GetFont()->GetFontBaked(ImGui::GetFontSize())`
+    - 从 `ImFontAtlas` 移动到 `ImTextureData` 的字段
+      - `ImFontAtlas->TexWidth`         -> `ImFontAtlas->TexData->Width`
+      - `ImFontAtlas->TexHeight`        -> `ImFontAtlas->TexData->Height`
+      - `ImFontAtlas->TexPixelsAlpha8`  -> `ImFontAtlas->TexData->GetPixels()` (当 `ImFontAtlas::TexDesiredFormat == ImTextureFormat_Alpha8`)
+      - `ImFontAtlas->TexPixelsRGBA32`  -> `ImFontAtlas->TexData->GetPixels()` (当 `ImFontAtlas::TexDesiredFormat == ImTextureFormat_RGBA32`)
+  如果您受到影响，请报告！
+- 字体：（`imgui_freetype` 的用户）
+  - 将 `ImFontAtlas::FontBuilderFlags` 重命名为 `ImFontAtlas::FontLoaderFlags`。
+  - 将 `ImFontConfig::FontBuilderFlags` 重命名为 `ImFontConfig::FontLoaderFlags`。
+  - 将 `ImGuiFreeTypeBuilderFlags` 重命名为 `ImGuiFreeTypeLoaderFlags`。
+  - 如果您使用运行时 `imgui_freetype` 选择而不是 `IMGUI_ENABLE_FREETYPE` 提供的默认编译时
+    选项：
+     - 将 `ImFontBuilderIO` 重命名/重构为 `ImFontLoader`，
+     - 将 `ImGuiFreeType::GetBuilderForFreeType()` 重命名为 `ImGuiFreeType::GetFontLoader()`
+       - 旧： `io.Fonts->FontBuilderIO = ImGuiFreeType::GetBuilderForFreeType()`
+       - 新： `io.Fonts->FontLoader = ImGuiFreeType::GetFontLoader()`
+- DrawList：将 `ImDrawList::PushTextureID()/PopTextureID()` 重命名为 `PushTexture()/PopTexture()`。
+- 字体：（自定义矩形的用户）
+  - 将 `AddCustomRectRegular()` 重命名为 `AddCustomRect()`。(#8466)
+  - 添加了 `GetCustomRect()` 作为 `GetCustomRectByIndex()` + `CalcCustomRectUV()` 的替代品。(#8466)
+  - `GetCustomRect()` 的输出类型现在是 `ImFontAtlasRect`，其中包括 UV 坐标。
+      - `ImFontAtlasCustomRect::X`      --> `ImFontAtlasRect::x`
+      - `ImFontAtlasCustomRect::Y`      --> `ImFontAtlasRect::y`
+      - `ImFontAtlasCustomRect::Width`  --> `ImFontAtlasRect::w`
+      - `ImFontAtlasCustomRect::Height` --> `ImFontAtlasRect::h`
+    之前：
+        `const ImFontAtlasCustomRect* r = atlas->GetCustomRectByIndex(custom_rect_id);`
+        `ImVec2 uv0, uv1;`
+        `atlas->GetCustomRectUV(r, &uv0, &uv1);`
+        `ImGui::Image(atlas->TexRef, ImVec2(r->w, r->h), uv0, uv1);`
+    之后：
+        `ImFontAtlasRect r;`
+        `atlas->GetCustomRect(custom_rect_id, &r);`
+        `ImGui::Image(atlas->TexRef, ImVec2(r.w, r.h), r.uv0, r.uv1);`
+    我们添加了一个重定向的 typedef，但没有尝试神奇地重定向
+    字段名称，因为此 API 很少使用且修复很简单。
+  - 废弃了 `AddCustomRectFontGlyph()`，因为该 API 对于可缩放字体没有意义：
+    - 保留了使用字体“默认大小”(`Sources[0]->LegacySize`) 的现有函数。
+    - 添加了一个辅助函数 `AddCustomRectFontGlyphForSize()`，它立即被标记为过时，
+      但可以方便地转换旧代码。
+    - 建议使用自定义/过程加载器添加字体源 (`ImFontConfig`)。
+- 后端：移除了所有具有它们的后端的 `ImGui_ImplXXXX_CreateFontsTexture()/ImGui_ImplXXXX_DestroyFontsTexture()`。
+  它们应该不再是必需的。
+   - 移除了 `ImGui_ImplMetal_CreateFontsTexture()`, `ImGui_ImplMetal_DestroyFontsTexture()`。
+   - 移除了 `ImGui_ImplOpenGL2_CreateFontsTexture()`, `ImGui_ImplOpenGL2_DestroyFontsTexture()`。
+   - 移除了 `ImGui_ImplOpenGL3_CreateFontsTexture()`, `ImGui_ImplOpenGL3_DestroyFontsTexture()`。
+   - 移除了 `ImGui_ImplSDLGPU3_CreateFontsTexture()`, `ImGui_ImplSDLGPU3_DestroyFontsTexture()`。
+   - 移除了 `ImGui_ImplSDLRenderer2_CreateFontsTexture()`, `ImGui_ImplSDLRenderer2_DestroyFontsTexture()`。
+   - 移除了 `ImGui_ImplSDLRenderer3_CreateFontsTexture()`, `ImGui_ImplSDLRenderer3_DestroyFontsTexture()`。
+   - 移除了 `ImGui_ImplVulkan_CreateFontsTexture()`, `ImGui_ImplVulkan_DestroyFontsTexture()`。
+- 布局：注释掉了在 1.89（2022 年 8 月）中废弃的旧版 `ErrorCheckUsingSetCursorPosToExtendParentBoundaries()` 回退
+  ，它允许在没有项目的情况下调用 `SetCursorPos()/SetCursorScreenPos()`
+  来扩展父窗口/单元格边界。替换为断言/工具提示，如果
+  以前使用 `IMGUI_DISABLE_OBSOLETE_FUNCTIONS`，则已经会发生。(#5548, #4510, #3355, #1760, #1490, #4152, #150)
+  - 使窗口内容大小为 200x200 的不正确方法：
+      `Begin(...) + SetCursorScreenPos(GetCursorScreenPos() + ImVec2(200,200)) + End();`
+  - 使窗口内容大小为 200x200 的正确方法：
+      `Begin(...) + SetCursorScreenPos(GetCursorScreenPos() + ImVec2(200,200)) + Dummy(ImVec2(0,0)) + End();`
+      `Begin(...) + Dummy(ImVec2(200,200)) + End();`
+  - 长话短说：如果断言触发，您可以添加一个 `Dummy({0,0})` 调用来验证扩展父边界。
+- TreeNode：为清晰起见，将 `ImGuiTreeNodeFlags_NavLeftJumpsBackHere` 重命名为 `ImGuiTreeNodeFlags_NavLeftJumpsToParent`。
+  保留了内联重定向枚举（将过时）。(#1079, #8639)
+- 注释掉了在 1.89.4（2023 年 3 月）中废弃的 `PushAllowKeyboardFocus()/PopAllowKeyboardFocus()`。(#3092)
+   - `PushAllowKeyboardFocus(bool tab_stop)` --> `PushItemFlag(ImGuiItemFlags_NoTabStop, !tab_stop);`
+   - `PopAllowKeyboardFocus()`               --> `PopItemFlag()`。
+- 注释掉了在 1.89.6（2023 年 6 月）中废弃的 `ImGuiListClipper::ForceDisplayRangeByIndices()`。
+   - `ForceDisplayRangeByIndices()`          --> `IncludeItemsByIndex()`
+- 后端：SDL3：修复了函数名称中的大小写拼写错误：(#8509, #8163, #7998, #7988) [@puugz]
+   - `Imgui_ImplSDLGPU3_PrepareDrawData()` --> `ImGui_ImplSDLGPU3_PrepareDrawData()`
+- 内部：`RenderTextEllipsis()` 函数移除了直接
+  在 `float ellipsis_max_x` 之前的 `float clip_max_x` 参数。对于绝大多数用户来说，值是相同的。(#8387)
